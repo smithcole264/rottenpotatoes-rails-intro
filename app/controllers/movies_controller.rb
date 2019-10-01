@@ -13,15 +13,18 @@ class MoviesController < ApplicationController
   def index
     #@movies = Movie.all
     
-    sort = params[:sort] || session[:sort]
-    case sort
+    @movies = Movie.order(params[:sort_by])
+    @sort_column = params[:sort_by]
+    
+    movie_sort = params[:sort] || session[:sort]
+    
+    case movie_sort
     when 'title'
       ordering,@title_header = {:title => :asc}, 'hilite'
     when 'release_date'
       ordering,@date_header = {:release_date => :asc}, 'hilite'
     end
-    #@movies = Movie.order(params[:sort_by])
-    #@sort_column = params[:sort_by]
+    
     @all_ratings = Movie.all_ratings
     @selected_ratings = params[:ratings] || session[:ratings] || {}
 
@@ -30,9 +33,9 @@ class MoviesController < ApplicationController
     end
 
     if params[:sort] != session[:sort] or params[:ratings] != session[:ratings]
-      session[:sort] = sort
+      session[:sort] = movie_sort
       session[:ratings] = @selected_ratings
-      redirect_to :sort => sort, :ratings => @selected_ratings and return
+      redirect_to :sort => movie_sort, :ratings => @selected_ratings and return
     end
     @movies = Movie.where(rating: @selected_ratings.keys).order(ordering)
   end
